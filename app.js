@@ -15,7 +15,8 @@
   const DOT_RED        = '#FF5F57';
   const DOT_YELLOW     = '#FFBD2E';
   const DOT_GREEN      = '#28C840';
-  const FRAME_BORDER   = '#ECECEE';
+  const FRAME_BORDER        = '#ECECEE';
+  const PLACEHOLDER_HEIGHT  = 520; // empty-state screenshot area height
 
 
   // ─── DOM refs ─────────────────────────────────────────────────────────────
@@ -61,7 +62,7 @@
   }
 
   function computeCanvasHeight(imgHeight) {
-    return PADDING + CHROME_HEIGHT + (imgHeight ?? 360) + PADDING;
+    return PADDING + CHROME_HEIGHT + (imgHeight ?? PLACEHOLDER_HEIGHT) + PADDING;
   }
 
   // ─── High-quality image scaling ───────────────────────────────────────────
@@ -104,7 +105,7 @@
     const imgW = img ? Math.min(img.naturalWidth, SCREENSHOT_WIDTH) : SCREENSHOT_WIDTH;
     const scaledImgH = img
       ? Math.round((img.naturalHeight / img.naturalWidth) * imgW)
-      : 360;
+      : PLACEHOLDER_HEIGHT;
 
     const logicalH = computeCanvasHeight(scaledImgH);
 
@@ -194,7 +195,7 @@
     const imgW = img ? Math.min(img.naturalWidth, SCREENSHOT_WIDTH) : SCREENSHOT_WIDTH;
     const scaledImgH = img
       ? Math.round((img.naturalHeight / img.naturalWidth) * imgW)
-      : 360;
+      : PLACEHOLDER_HEIGHT;
     const logicalH = computeCanvasHeight(scaledImgH);
 
     canvas.width  = CANVAS_WIDTH * DPR;
@@ -217,7 +218,7 @@
     dropOverlay.style.left   = `${PADDING * scale}px`;
     dropOverlay.style.top    = `${(PADDING + CHROME_HEIGHT) * scale}px`;
     dropOverlay.style.width  = `${SCREENSHOT_WIDTH * scale}px`;
-    dropOverlay.style.height = `${360 * scale}px`; // placeholder always full width
+    dropOverlay.style.height = `${PLACEHOLDER_HEIGHT * scale}px`;
     dropOverlay.style.display = 'flex';
   }
 
