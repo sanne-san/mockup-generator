@@ -61,8 +61,38 @@
     return PADDING + CHROME_HEIGHT + (imgHeight ?? 360) + PADDING;
   }
 
+  // ─── High-quality image scaling ───────────────────────────────────────────
+  // A single canvas drawImage call is blurry when downscaling by more than 2×
+  // (common with retina screenshots). Halving repeatedly gives Lanczos-like
+  // quality by keeping each step within a 2× ratio.
+
+  function scaleImageHighQuality(source, targetW, targetH) {
+    let srcW = source.naturalWidth || source.width;
+    let srcH = source.naturalHeight || source.height;
+
+    // Already within 2× — one final drawImage step is fine
+    if (srcW <= targetW * 2 && srcH <= targetH * 2) return source;
+
+    let current = source;
+    while (srcW > targetW * 2 || srcH > targetH * 2) {
+      const nextW = Math.max(Math.ceil(srcW / 2), targetW);
+      const nextH = Math.max(Math.ceil(srcH / 2), targetH);
+      const step  = document.createElement('canvas');
+      step.width  = nextW;
+      step.height = nextH;
+      const sc = step.getContext('2d');
+      sc.imageSmoothingEnabled = true;
+      sc.imageSmoothingQuality = 'high';
+      sc.drawImage(current, 0, 0, nextW, nextH);
+      current = step;
+      srcW = nextW;
+      srcH = nextH;
+    }
+    return current;
+  }
+
   // ─── Core drawing function ────────────────────────────────────────────────
-  // Draws the mockup onto any 2D context in LOGICAL coordinates (1600px space).
+  // Draws the mockup onto any 2D context in LOGICAL coordinates (2000px space).
   // Called both for the preview canvas (DPR-scaled) and the export canvas (1×).
 
   function drawMockupOnContext(c, img) {
@@ -123,9 +153,10 @@
     // ── Screenshot / placeholder ──
     const screenshotY = frameY + CHROME_HEIGHT;
     if (img) {
+      const scaled = scaleImageHighQuality(img, SCREENSHOT_WIDTH, scaledImgH);
       c.imageSmoothingEnabled = true;
       c.imageSmoothingQuality = 'high';
-      c.drawImage(img, frameX, screenshotY, SCREENSHOT_WIDTH, scaledImgH);
+      c.drawImage(scaled, frameX, screenshotY, SCREENSHOT_WIDTH, scaledImgH);
     } else {
       c.fillStyle = '#FFFFFF';
       c.fillRect(frameX, screenshotY, SCREENSHOT_WIDTH, scaledImgH);
