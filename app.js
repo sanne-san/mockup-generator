@@ -29,7 +29,7 @@
   const downloadLabel = document.getElementById('download-label');
   const resetBtn      = document.getElementById('reset-btn');
 
-  downloadLabel.textContent = 'Download PNG';
+  downloadLabel.textContent = 'Download WebP';
 
   // ─── State ────────────────────────────────────────────────────────────────
   let loadedImage = null;
@@ -249,12 +249,12 @@
       const url = URL.createObjectURL(blob);
       const a   = document.createElement('a');
       a.href     = url;
-      a.download = 'mockup.png';
+      a.download = 'mockup.webp';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    }, 'image/png');
+    }, 'image/webp', 0.95);
   }
 
   // ─── Paste ────────────────────────────────────────────────────────────────
