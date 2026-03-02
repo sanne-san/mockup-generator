@@ -288,8 +288,16 @@
     circleDot(c, fx + 40,      dotY, 6, DOT_YELLOW);
     circleDot(c, fx + 60,      dotY, 6, DOT_GREEN);
 
-    // Screenshot — drawn directly, smoothing already set on the context
-    c.drawImage(src, fx, fy + CHROME_HEIGHT, drawW, drawH);
+    // Pre-scale the screenshot to exact target dimensions in a dedicated canvas,
+    // then stamp it 1:1 (no scaling at this step, so smoothing settings are irrelevant).
+    const scaled = document.createElement('canvas');
+    scaled.width  = drawW;
+    scaled.height = drawH;
+    const sc = scaled.getContext('2d');
+    sc.imageSmoothingEnabled = true;
+    sc.imageSmoothingQuality = 'high';
+    sc.drawImage(src, 0, 0, drawW, drawH);
+    c.drawImage(scaled, fx, fy + CHROME_HEIGHT);
 
     c.restore();
 
