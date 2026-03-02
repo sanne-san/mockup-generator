@@ -230,29 +230,45 @@
   }
 
   // ─── Download ─────────────────────────────────────────────────────────────
-  // Fully self-contained — does not share context with the preview canvas.
-  // imageSmoothingQuality is set once on the raw context before any save/restore.
 
-  function download() {
+  async function download() {
     if (!loadedImage) return;
 
-    const src   = loadedImage;
-    // Draw at native resolution — zero scaling, zero quality loss.
-    // Output width = image width + padding. No SCREENSHOT_WIDTH cap applied here.
-    const drawW  = src.naturalWidth;
-    const drawH  = src.naturalHeight;
-    const totalW = drawW + PADDING * 2;
-    const totalH = PADDING + CHROME_HEIGHT + drawH + PADDING;
+    const src  = loadedImage;
+    const imgW = SCREENSHOT_WIDTH;
+    const imgH = Math.round(src.naturalHeight * (imgW / src.naturalWidth));
 
-    const el  = document.createElement('canvas');
+    // Use createImageBitmap to scale — this uses the browser's native image
+    // processing pipeline (higher quality than canvas drawImage for downscaling).
+    // Falls back to a plain canvas drawImage if not supported.
+    let scaledSource;
+    try {
+      scaledSource = await createImageBitmap(src, {
+        resizeWidth:   imgW,
+        resizeHeight:  imgH,
+        resizeQuality: 'high',
+      });
+    } catch (_) {
+      // Fallback: draw to intermediate canvas at target size
+      const tmp  = document.createElement('canvas');
+      tmp.width  = imgW;
+      tmp.height = imgH;
+      const tc   = tmp.getContext('2d');
+      tc.imageSmoothingEnabled = true;
+      tc.imageSmoothingQuality = 'high';
+      tc.drawImage(src, 0, 0, imgW, imgH);
+      scaledSource = tmp;
+    }
+
+    const totalW = CANVAS_WIDTH;
+    const totalH = PADDING + CHROME_HEIGHT + imgH + PADDING;
+    const fx = PADDING, fy = PADDING;
+    const fw = imgW,    fh = CHROME_HEIGHT + imgH;
+
+    const el = document.createElement('canvas');
     el.width  = totalW;
     el.height = totalH;
-    const c   = el.getContext('2d');
-
-    const fx = PADDING;
-    const fy = PADDING;
-    const fw = drawW;
-    const fh = CHROME_HEIGHT + drawH;
+    const c = el.getContext('2d');
 
     // Shadow
     c.save();
@@ -270,7 +286,7 @@
     c.fillStyle = CHROME_BG;
     c.fill();
 
-    // Clip to frame
+    // Clip
     c.save();
     roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
     c.clip();
@@ -279,16 +295,18 @@
     c.fillStyle = CHROME_BAR_BG;
     c.fillRect(fx, fy, fw, CHROME_HEIGHT);
 
-    // Traffic light dots
+    // Dots
     const dotY = fy + CHROME_HEIGHT / 2;
     circleDot(c, fx + 20, dotY, 6, DOT_RED);
     circleDot(c, fx + 40, dotY, 6, DOT_YELLOW);
     circleDot(c, fx + 60, dotY, 6, DOT_GREEN);
 
-    // Screenshot at native resolution — no scaling whatsoever
-    c.drawImage(src, fx, fy + CHROME_HEIGHT);
+    // Screenshot — already scaled to exact size, drawn 1:1
+    c.drawImage(scaledSource, fx, fy + CHROME_HEIGHT);
 
     c.restore();
+
+    if (scaledSource instanceof ImageBitmap) scaledSource.close();
 
     el.toBlob((blob) => {
       const url = URL.createObjectURL(blob);
