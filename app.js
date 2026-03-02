@@ -146,9 +146,6 @@
     circleDot(c, dotsX + dotGap,  dotY, dotR, DOT_YELLOW);
     circleDot(c, dotsX + dotGap * 2, dotY, dotR, DOT_GREEN);
 
-    // Separator
-    c.fillStyle = '#E5E5E5';
-    c.fillRect(frameX, frameY + CHROME_HEIGHT - 1, frameW, 1);
 
     // ── Screenshot / placeholder ──
     const screenshotY = frameY + CHROME_HEIGHT;
