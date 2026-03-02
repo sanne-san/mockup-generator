@@ -230,24 +230,70 @@
   }
 
   // ─── Download ─────────────────────────────────────────────────────────────
-  // Redraws the mockup fresh on a 1× off-screen canvas so the output is always
-  // a clean 1600px render — no downsampling from the DPR display canvas.
+  // Fully self-contained — does not share context with the preview canvas.
+  // imageSmoothingQuality is set once on the raw context before any save/restore.
 
   function download() {
-    const imgW = loadedImage ? Math.min(loadedImage.naturalWidth, SCREENSHOT_WIDTH) : SCREENSHOT_WIDTH;
-    const scaledImgH = loadedImage
-      ? Math.round((loadedImage.naturalHeight / loadedImage.naturalWidth) * imgW)
-      : 360;
-    const logicalH = computeCanvasHeight(scaledImgH);
+    if (!loadedImage) return;
 
-    const exportCanvas = document.createElement('canvas');
-    exportCanvas.width  = imgW + PADDING * 2;
-    exportCanvas.height = logicalH;
+    const src   = loadedImage;
+    const drawW = Math.min(src.naturalWidth, SCREENSHOT_WIDTH);
+    const drawH = Math.round(src.naturalHeight * (drawW / src.naturalWidth));
 
-    const exportCtx = exportCanvas.getContext('2d');
-    drawMockupOnContext(exportCtx, loadedImage);
+    const totalW = drawW + PADDING * 2;
+    const totalH = PADDING + CHROME_HEIGHT + drawH + PADDING;
 
-    exportCanvas.toBlob((blob) => {
+    const el  = document.createElement('canvas');
+    el.width  = totalW;
+    el.height = totalH;
+    const c   = el.getContext('2d');
+
+    // Set smoothing on the raw context FIRST before any save/restore
+    c.imageSmoothingEnabled = true;
+    c.imageSmoothingQuality = 'high';
+
+    const fx = PADDING;
+    const fy = PADDING;
+    const fw = drawW;
+    const fh = CHROME_HEIGHT + drawH;
+
+    // Shadow
+    c.save();
+    c.shadowColor   = SHADOW_COLOR;
+    c.shadowBlur    = SHADOW_BLUR;
+    c.shadowOffsetX = 0;
+    c.shadowOffsetY = SHADOW_OFFSET_Y;
+    roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
+    c.fillStyle = CHROME_BG;
+    c.fill();
+    c.restore();
+
+    // Frame
+    roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
+    c.fillStyle = CHROME_BG;
+    c.fill();
+
+    // Clip to frame
+    c.save();
+    roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
+    c.clip();
+
+    // Chrome bar
+    c.fillStyle = CHROME_BAR_BG;
+    c.fillRect(fx, fy, fw, CHROME_HEIGHT);
+
+    // Traffic light dots
+    const dotY = fy + CHROME_HEIGHT / 2;
+    circleDot(c, fx + 20,      dotY, 6, DOT_RED);
+    circleDot(c, fx + 40,      dotY, 6, DOT_YELLOW);
+    circleDot(c, fx + 60,      dotY, 6, DOT_GREEN);
+
+    // Screenshot — drawn directly, smoothing already set on the context
+    c.drawImage(src, fx, fy + CHROME_HEIGHT, drawW, drawH);
+
+    c.restore();
+
+    el.toBlob((blob) => {
       const url = URL.createObjectURL(blob);
       const a   = document.createElement('a');
       a.href     = url;
