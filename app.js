@@ -1,23 +1,21 @@
 (() => {
   // ─── Constants ────────────────────────────────────────────────────────────
   const CANVAS_WIDTH     = 2000;
-  const PADDING          = 64;
+  const PADDING          = 40;
   const CHROME_HEIGHT    = 44;
   const CHROME_RADIUS    = 12;
-  const SCREENSHOT_WIDTH = CANVAS_WIDTH - PADDING * 2; // 1872px
+  const SCREENSHOT_WIDTH = CANVAS_WIDTH - PADDING * 2; // 1920px
 
   // Cap DPR at 2 to avoid huge canvases on 3× displays
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
 
   // Browser chrome colours
-  const CHROME_BG     = '#FFFFFF';
-  const CHROME_BAR_BG = '#F5F5F7';
-  const DOT_RED       = '#FF5F57';
-  const DOT_YELLOW    = '#FFBD2E';
-  const DOT_GREEN     = '#28C840';
-  const SHADOW_COLOR  = 'rgba(0, 0, 0, 0.18)';
-  const SHADOW_BLUR   = 60;
-  const SHADOW_OFFSET_Y = 24;
+  const CHROME_BG      = '#FFFFFF';
+  const CHROME_BAR_BG  = '#F5F5F7';
+  const DOT_RED        = '#FF5F57';
+  const DOT_YELLOW     = '#FFBD2E';
+  const DOT_GREEN      = '#28C840';
+  const FRAME_BORDER   = '#ECECEE';
 
 
   // ─── DOM refs ─────────────────────────────────────────────────────────────
@@ -118,23 +116,32 @@
     // Clear to transparent
     c.clearRect(0, 0, CANVAS_WIDTH, logicalH);
 
-    // ── Shadow ──
+    // ── Shadows (two-layer to match CSS: rgba(0,0,0,0.1) 0 20px 25px -5px, rgba(0,0,0,0.04) 0 10px 10px -5px) ──
+    // Spread -5px is simulated by shrinking the shadow source rect by 5px each side.
     c.save();
-    c.shadowColor    = SHADOW_COLOR;
-    c.shadowBlur     = SHADOW_BLUR;
-    c.shadowOffsetX  = 0;
-    c.shadowOffsetY  = SHADOW_OFFSET_Y;
-    roundRect(c, frameX, frameY, frameW, frameH, CHROME_RADIUS);
+    c.shadowColor   = 'rgba(0, 0, 0, 0.1)';
+    c.shadowBlur    = 25;
+    c.shadowOffsetX = 0;
+    c.shadowOffsetY = 20;
+    roundRect(c, frameX + 5, frameY + 5, frameW - 10, frameH - 10, CHROME_RADIUS);
+    c.fillStyle = CHROME_BG;
+    c.fill();
+    c.restore();
+
+    c.save();
+    c.shadowColor   = 'rgba(0, 0, 0, 0.04)';
+    c.shadowBlur    = 10;
+    c.shadowOffsetX = 0;
+    c.shadowOffsetY = 10;
+    roundRect(c, frameX + 5, frameY + 5, frameW - 10, frameH - 10, CHROME_RADIUS);
     c.fillStyle = CHROME_BG;
     c.fill();
     c.restore();
 
     // ── White frame ──
-    c.save();
     roundRect(c, frameX, frameY, frameW, frameH, CHROME_RADIUS);
     c.fillStyle = CHROME_BG;
     c.fill();
-    c.restore();
 
     // Clip to inside rounded frame
     c.save();
@@ -168,6 +175,14 @@
     }
 
     c.restore(); // end clip
+
+    // ── Border ──
+    c.save();
+    roundRect(c, frameX, frameY, frameW, frameH, CHROME_RADIUS);
+    c.strokeStyle = FRAME_BORDER;
+    c.lineWidth   = 1;
+    c.stroke();
+    c.restore();
 
     return logicalH;
   }
@@ -327,13 +342,23 @@
     el.height = totalH;
     const c = el.getContext('2d');
 
-    // Shadow
+    // Shadows
     c.save();
-    c.shadowColor   = SHADOW_COLOR;
-    c.shadowBlur    = SHADOW_BLUR;
+    c.shadowColor   = 'rgba(0, 0, 0, 0.1)';
+    c.shadowBlur    = 25;
     c.shadowOffsetX = 0;
-    c.shadowOffsetY = SHADOW_OFFSET_Y;
-    roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
+    c.shadowOffsetY = 20;
+    roundRect(c, fx + 5, fy + 5, fw - 10, fh - 10, CHROME_RADIUS);
+    c.fillStyle = CHROME_BG;
+    c.fill();
+    c.restore();
+
+    c.save();
+    c.shadowColor   = 'rgba(0, 0, 0, 0.04)';
+    c.shadowBlur    = 10;
+    c.shadowOffsetX = 0;
+    c.shadowOffsetY = 10;
+    roundRect(c, fx + 5, fy + 5, fw - 10, fh - 10, CHROME_RADIUS);
     c.fillStyle = CHROME_BG;
     c.fill();
     c.restore();
@@ -361,6 +386,14 @@
     // Screenshot — already scaled to exact size, drawn 1:1
     c.drawImage(scaledSource, fx, fy + CHROME_HEIGHT);
 
+    c.restore();
+
+    // Border
+    c.save();
+    roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
+    c.strokeStyle = FRAME_BORDER;
+    c.lineWidth   = 1;
+    c.stroke();
     c.restore();
 
     if (scaledSource instanceof ImageBitmap) scaledSource.close();
@@ -411,9 +444,20 @@
     const c = el.getContext('2d');
 
     c.save();
-    c.shadowColor = SHADOW_COLOR; c.shadowBlur = SHADOW_BLUR;
-    c.shadowOffsetX = 0; c.shadowOffsetY = SHADOW_OFFSET_Y;
-    roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
+    c.shadowColor   = 'rgba(0, 0, 0, 0.1)';
+    c.shadowBlur    = 25;
+    c.shadowOffsetX = 0;
+    c.shadowOffsetY = 20;
+    roundRect(c, fx + 5, fy + 5, fw - 10, fh - 10, CHROME_RADIUS);
+    c.fillStyle = CHROME_BG; c.fill();
+    c.restore();
+
+    c.save();
+    c.shadowColor   = 'rgba(0, 0, 0, 0.04)';
+    c.shadowBlur    = 10;
+    c.shadowOffsetX = 0;
+    c.shadowOffsetY = 10;
+    roundRect(c, fx + 5, fy + 5, fw - 10, fh - 10, CHROME_RADIUS);
     c.fillStyle = CHROME_BG; c.fill();
     c.restore();
 
@@ -430,6 +474,13 @@
     circleDot(c, fx + 40, dotY, 6, DOT_YELLOW);
     circleDot(c, fx + 60, dotY, 6, DOT_GREEN);
     c.drawImage(scaledSource, fx, fy + CHROME_HEIGHT);
+    c.restore();
+
+    c.save();
+    roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
+    c.strokeStyle = FRAME_BORDER;
+    c.lineWidth   = 1;
+    c.stroke();
     c.restore();
 
     if (scaledSource instanceof ImageBitmap) scaledSource.close();
