@@ -28,11 +28,18 @@
   const downloadBtn   = document.getElementById('download-btn');
   const downloadLabel = document.getElementById('download-label');
   const resetBtn      = document.getElementById('reset-btn');
+  const cropBtn       = document.getElementById('crop-btn');
+  const cropModal     = document.getElementById('crop-modal');
+  const cropImage     = document.getElementById('crop-image');
+  const cropApplyBtn  = document.getElementById('crop-apply-btn');
+  const cropCancelBtn = document.getElementById('crop-cancel-btn');
 
   downloadLabel.textContent = 'Download';
 
   // ─── State ────────────────────────────────────────────────────────────────
-  let loadedImage = null;
+  let loadedImage   = null;  // currently displayed image (may be cropped)
+  let originalImage = null;  // the raw uploaded image (never modified)
+  let cropperInstance = null;
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -203,17 +210,23 @@
 
   // ─── Image loading ────────────────────────────────────────────────────────
 
+  function setActiveImage(img) {
+    loadedImage = img;
+    drawMockup(img);
+    dropOverlay.style.display = 'none';
+    downloadBtn.disabled = false;
+    cropBtn.style.display  = 'inline-flex';
+    resetBtn.style.display = 'inline-flex';
+  }
+
   function loadImageFromFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        loadedImage = img;
-        drawMockup(img);
-        dropOverlay.style.display = 'none';
-        downloadBtn.disabled = false;
-        resetBtn.style.display = 'inline-flex';
+        originalImage = img;
+        setActiveImage(img);
       };
       img.src = e.target.result;
     };
@@ -221,12 +234,56 @@
   }
 
   function reset() {
-    loadedImage = null;
+    loadedImage   = null;
+    originalImage = null;
     fileInput.value = '';
     downloadBtn.disabled = true;
+    cropBtn.style.display  = 'none';
     resetBtn.style.display = 'none';
     drawMockup(null);
     requestAnimationFrame(positionOverlay);
+  }
+
+  // ─── Crop ─────────────────────────────────────────────────────────────────
+
+  function openCropModal() {
+    if (!originalImage) return;
+    cropImage.src = originalImage.src;
+    cropModal.style.display = 'flex';
+    // Init Cropper.js after the image renders
+    cropImage.onload = () => {
+      if (cropperInstance) cropperInstance.destroy();
+      cropperInstance = new Cropper(cropImage, {
+        viewMode: 1,
+        autoCropArea: 1,
+        movable: true,
+        zoomable: true,
+        rotatable: false,
+        scalable: false,
+        background: false,
+      });
+    };
+    // If already loaded (cached src), fire manually
+    if (cropImage.complete) cropImage.onload();
+  }
+
+  function closeCropModal() {
+    cropModal.style.display = 'none';
+    if (cropperInstance) {
+      cropperInstance.destroy();
+      cropperInstance = null;
+    }
+  }
+
+  function applyCrop() {
+    if (!cropperInstance) return;
+    const croppedCanvas = cropperInstance.getCroppedCanvas();
+    const img = new Image();
+    img.onload = () => {
+      setActiveImage(img);
+      closeCropModal();
+    };
+    img.src = croppedCanvas.toDataURL();
   }
 
   // ─── Download ─────────────────────────────────────────────────────────────
@@ -352,6 +409,10 @@
 
   downloadBtn.addEventListener('click', download);
   resetBtn.addEventListener('click', reset);
+  cropBtn.addEventListener('click', openCropModal);
+  cropApplyBtn.addEventListener('click', applyCrop);
+  cropCancelBtn.addEventListener('click', closeCropModal);
+  cropModal.addEventListener('click', (e) => { if (e.target === cropModal) closeCropModal(); });
 
   window.addEventListener('paste', handlePaste);
   document.addEventListener('paste', handlePaste);
@@ -363,6 +424,7 @@
   // ─── Init ─────────────────────────────────────────────────────────────────
 
   resetBtn.style.display = 'none';
+  cropBtn.style.display  = 'none';
   drawMockup(null);
   requestAnimationFrame(positionOverlay);
 })();
