@@ -26,15 +26,13 @@
   const dropOverlay   = document.getElementById('drop-overlay');
   const fileInput     = document.getElementById('file-input');
   const downloadBtn   = document.getElementById('download-btn');
-  const downloadLabel = document.getElementById('download-label');
+  const copyBtn       = document.getElementById('copy-btn');
   const resetBtn      = document.getElementById('reset-btn');
   const cropBtn       = document.getElementById('crop-btn');
   const cropModal     = document.getElementById('crop-modal');
   const cropImage     = document.getElementById('crop-image');
   const cropApplyBtn  = document.getElementById('crop-apply-btn');
   const cropCancelBtn = document.getElementById('crop-cancel-btn');
-
-  downloadLabel.textContent = 'Download';
 
   // ─── State ────────────────────────────────────────────────────────────────
   let loadedImage   = null;  // currently displayed image (may be cropped)
@@ -215,6 +213,7 @@
     drawMockup(img);
     dropOverlay.style.display = 'none';
     downloadBtn.disabled = false;
+    copyBtn.disabled     = false;
     cropBtn.style.display  = 'inline-flex';
     resetBtn.style.display = 'inline-flex';
   }
@@ -238,6 +237,7 @@
     originalImage = null;
     fileInput.value = '';
     downloadBtn.disabled = true;
+    copyBtn.disabled     = true;
     cropBtn.style.display  = 'none';
     resetBtn.style.display = 'none';
     drawMockup(null);
@@ -377,6 +377,79 @@
     }, 'image/webp', 0.95);
   }
 
+  // ─── Copy to clipboard ────────────────────────────────────────────────────
+  // Clipboard API only supports image/png, so we export PNG for this action.
+
+  async function copyToClipboard() {
+    if (!loadedImage) return;
+
+    const src  = loadedImage;
+    const imgW = SCREENSHOT_WIDTH;
+    const imgH = Math.round(src.naturalHeight * (imgW / src.naturalWidth));
+
+    let scaledSource;
+    try {
+      scaledSource = await createImageBitmap(src, {
+        resizeWidth: imgW, resizeHeight: imgH, resizeQuality: 'high',
+      });
+    } catch (_) {
+      const tmp = document.createElement('canvas');
+      tmp.width = imgW; tmp.height = imgH;
+      const tc = tmp.getContext('2d');
+      tc.imageSmoothingEnabled = true;
+      tc.imageSmoothingQuality = 'high';
+      tc.drawImage(src, 0, 0, imgW, imgH);
+      scaledSource = tmp;
+    }
+
+    const totalW = CANVAS_WIDTH;
+    const totalH = PADDING + CHROME_HEIGHT + imgH + PADDING;
+    const fx = PADDING, fy = PADDING, fw = imgW, fh = CHROME_HEIGHT + imgH;
+
+    const el = document.createElement('canvas');
+    el.width = totalW; el.height = totalH;
+    const c = el.getContext('2d');
+
+    c.save();
+    c.shadowColor = SHADOW_COLOR; c.shadowBlur = SHADOW_BLUR;
+    c.shadowOffsetX = 0; c.shadowOffsetY = SHADOW_OFFSET_Y;
+    roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
+    c.fillStyle = CHROME_BG; c.fill();
+    c.restore();
+
+    roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
+    c.fillStyle = CHROME_BG; c.fill();
+
+    c.save();
+    roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
+    c.clip();
+    c.fillStyle = CHROME_BAR_BG;
+    c.fillRect(fx, fy, fw, CHROME_HEIGHT);
+    const dotY = fy + CHROME_HEIGHT / 2;
+    circleDot(c, fx + 20, dotY, 6, DOT_RED);
+    circleDot(c, fx + 40, dotY, 6, DOT_YELLOW);
+    circleDot(c, fx + 60, dotY, 6, DOT_GREEN);
+    c.drawImage(scaledSource, fx, fy + CHROME_HEIGHT);
+    c.restore();
+
+    if (scaledSource instanceof ImageBitmap) scaledSource.close();
+
+    const originalLabel = copyBtn.textContent;
+    try {
+      await new Promise((resolve, reject) =>
+        el.toBlob(b => b ? resolve(b) : reject(), 'image/png')
+      ).then(async (blob) => {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob }),
+        ]);
+      });
+      copyBtn.textContent = 'Copied!';
+    } catch (err) {
+      copyBtn.textContent = 'Failed';
+    }
+    setTimeout(() => { copyBtn.textContent = originalLabel; }, 2000);
+  }
+
   // ─── Paste ────────────────────────────────────────────────────────────────
 
   function handlePaste(e) {
@@ -408,6 +481,7 @@
   });
 
   downloadBtn.addEventListener('click', download);
+  copyBtn.addEventListener('click', copyToClipboard);
   resetBtn.addEventListener('click', reset);
   cropBtn.addEventListener('click', openCropModal);
   cropApplyBtn.addEventListener('click', applyCrop);
@@ -425,6 +499,7 @@
 
   resetBtn.style.display = 'none';
   cropBtn.style.display  = 'none';
+  copyBtn.disabled       = true;
   drawMockup(null);
   requestAnimationFrame(positionOverlay);
 })();
