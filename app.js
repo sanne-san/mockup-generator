@@ -1,10 +1,10 @@
 (() => {
   // ─── Constants ────────────────────────────────────────────────────────────
-  const CANVAS_WIDTH     = 1600;
+  const CANVAS_WIDTH     = 2000;
   const PADDING          = 64;
   const CHROME_HEIGHT    = 44;
   const CHROME_RADIUS    = 12;
-  const SCREENSHOT_WIDTH = CANVAS_WIDTH - PADDING * 2; // 1472px
+  const SCREENSHOT_WIDTH = CANVAS_WIDTH - PADDING * 2; // 1872px
 
   // Cap DPR at 2 to avoid huge canvases on 3× displays
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -19,13 +19,6 @@
   const SHADOW_BLUR   = 60;
   const SHADOW_OFFSET_Y = 24;
 
-  // ─── WebP support detection ───────────────────────────────────────────────
-  function supportsWebP() {
-    const c = document.createElement('canvas');
-    c.width = 1; c.height = 1;
-    return c.toDataURL('image/webp').startsWith('data:image/webp');
-  }
-  const USE_WEBP = supportsWebP();
 
   // ─── DOM refs ─────────────────────────────────────────────────────────────
   const canvas        = document.getElementById('mockup-canvas');
@@ -36,7 +29,7 @@
   const downloadLabel = document.getElementById('download-label');
   const resetBtn      = document.getElementById('reset-btn');
 
-  downloadLabel.textContent = USE_WEBP ? 'Download WebP' : 'Download PNG';
+  downloadLabel.textContent = 'Download PNG';
 
   // ─── State ────────────────────────────────────────────────────────────────
   let loadedImage = null;
@@ -221,20 +214,16 @@
     const exportCtx = exportCanvas.getContext('2d');
     drawMockupOnContext(exportCtx, loadedImage);
 
-    const mime    = USE_WEBP ? 'image/webp' : 'image/png';
-    const ext     = USE_WEBP ? 'webp' : 'png';
-    const quality = USE_WEBP ? 0.92 : undefined;
-
     exportCanvas.toBlob((blob) => {
       const url = URL.createObjectURL(blob);
       const a   = document.createElement('a');
       a.href     = url;
-      a.download = `mockup.${ext}`;
+      a.download = 'mockup.png';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    }, mime, quality);
+    }, 'image/png');
   }
 
   // ─── Paste ────────────────────────────────────────────────────────────────
