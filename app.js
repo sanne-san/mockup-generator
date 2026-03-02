@@ -27,7 +27,6 @@
   const fileInput = document.getElementById('file-input');
   const downloadBtn = document.getElementById('download-btn');
   const resetBtn = document.getElementById('reset-btn');
-  const resetRow = document.getElementById('reset-row');
   const canvasContainer = document.getElementById('canvas-container');
 
   // ─── State ────────────────────────────────────────────────────────────────
@@ -149,6 +148,8 @@
     // ── Screenshot area ──────────────────────────────────────────────────────
     const screenshotY = frameY + CHROME_HEIGHT;
     if (img) {
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, frameX, screenshotY, SCREENSHOT_WIDTH, scaledImgH);
     } else {
       // White placeholder
@@ -205,7 +206,7 @@
         drawMockup(img);
         dropOverlay.style.display = 'none';
         downloadBtn.disabled = false;
-        resetRow.classList.remove('hidden');
+        resetBtn.classList.remove('hidden');
       };
       img.src = e.target.result;
     };
@@ -216,23 +217,22 @@
     loadedImage = null;
     fileInput.value = '';
     downloadBtn.disabled = true;
-    resetRow.classList.add('hidden');
+    resetBtn.classList.add('hidden');
     drawMockup(null);
-    // Re-position after a tick so layout has updated
     requestAnimationFrame(positionOverlay);
   }
 
   // ─── Download ─────────────────────────────────────────────────────────────
 
-  function downloadPNG() {
+  function downloadWebP() {
     canvas.toBlob((blob) => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'mockup.png';
+      a.download = 'mockup.webp';
       a.click();
       URL.revokeObjectURL(url);
-    }, 'image/png');
+    }, 'image/webp', 0.92);
   }
 
   // ─── Event listeners ──────────────────────────────────────────────────────
@@ -256,8 +256,20 @@
     loadFile(e.dataTransfer.files[0]);
   });
 
-  downloadBtn.addEventListener('click', downloadPNG);
+  downloadBtn.addEventListener('click', downloadWebP);
   resetBtn.addEventListener('click', reset);
+
+  // Paste (Cmd+V / Ctrl+V) anywhere on the page
+  document.addEventListener('paste', (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        loadFile(item.getAsFile());
+        break;
+      }
+    }
+  });
 
   // Re-position overlay whenever the window is resized
   window.addEventListener('resize', () => {

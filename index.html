@@ -44,20 +44,25 @@
   <!-- Header -->
   <header class="border-b border-gray-200 bg-white">
     <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div>
-        <h1 class="text-lg font-semibold text-gray-900">Mockup Generator</h1>
-        <p class="text-sm text-gray-500">Wrap screenshots in a browser chrome</p>
+      <h1 class="text-lg font-semibold text-gray-900">Mockup Generator</h1>
+      <div class="flex items-center gap-3">
+        <button
+          id="reset-btn"
+          class="hidden px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+        >
+          Remove image
+        </button>
+        <button
+          id="download-btn"
+          disabled
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-900"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          Download WebP
+        </button>
       </div>
-      <button
-        id="download-btn"
-        disabled
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-900"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-        </svg>
-        Download PNG
-      </button>
     </div>
   </header>
 
@@ -81,18 +86,11 @@
               d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
           </svg>
           <div class="text-center px-4">
-            <p class="text-sm font-medium text-gray-700">Drop your screenshot here</p>
+            <p class="text-sm font-medium text-gray-700">Drop or paste your screenshot here</p>
             <p class="text-xs text-gray-400 mt-1">or click to browse</p>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Reset link -->
-    <div id="reset-row" class="hidden mt-4 text-center">
-      <button id="reset-btn" class="text-sm text-gray-400 hover:text-gray-600 transition-colors">
-        Remove image and start over
-      </button>
     </div>
 
   </main>
