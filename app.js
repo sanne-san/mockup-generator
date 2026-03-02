@@ -96,15 +96,18 @@
   // Called both for the preview canvas (DPR-scaled) and the export canvas (1×).
 
   function drawMockupOnContext(c, img) {
+    // Never upscale — use the image's natural width if it's smaller than the
+    // target, so we always downscale (or draw 1:1) rather than interpolating up.
+    const imgW = img ? Math.min(img.naturalWidth, SCREENSHOT_WIDTH) : SCREENSHOT_WIDTH;
     const scaledImgH = img
-      ? Math.round((img.naturalHeight / img.naturalWidth) * SCREENSHOT_WIDTH)
+      ? Math.round((img.naturalHeight / img.naturalWidth) * imgW)
       : 360;
 
     const logicalH = computeCanvasHeight(scaledImgH);
 
     const frameX = PADDING;
     const frameY = PADDING;
-    const frameW = SCREENSHOT_WIDTH;
+    const frameW = imgW;
     const frameH = CHROME_HEIGHT + scaledImgH;
 
     // Clear to transparent
@@ -150,10 +153,10 @@
     // ── Screenshot / placeholder ──
     const screenshotY = frameY + CHROME_HEIGHT;
     if (img) {
-      const scaled = scaleImageHighQuality(img, SCREENSHOT_WIDTH, scaledImgH);
+      const scaled = scaleImageHighQuality(img, imgW, scaledImgH);
       c.imageSmoothingEnabled = true;
       c.imageSmoothingQuality = 'high';
-      c.drawImage(scaled, frameX, screenshotY, SCREENSHOT_WIDTH, scaledImgH);
+      c.drawImage(scaled, frameX, screenshotY, imgW, scaledImgH);
     } else {
       c.fillStyle = '#FFFFFF';
       c.fillRect(frameX, screenshotY, SCREENSHOT_WIDTH, scaledImgH);
@@ -168,8 +171,9 @@
   // Uses DPR scaling so the canvas is sharp on Retina displays.
 
   function drawMockup(img) {
+    const imgW = img ? Math.min(img.naturalWidth, SCREENSHOT_WIDTH) : SCREENSHOT_WIDTH;
     const scaledImgH = img
-      ? Math.round((img.naturalHeight / img.naturalWidth) * SCREENSHOT_WIDTH)
+      ? Math.round((img.naturalHeight / img.naturalWidth) * imgW)
       : 360;
     const logicalH = computeCanvasHeight(scaledImgH);
 
@@ -193,7 +197,7 @@
     dropOverlay.style.left   = `${PADDING * scale}px`;
     dropOverlay.style.top    = `${(PADDING + CHROME_HEIGHT) * scale}px`;
     dropOverlay.style.width  = `${SCREENSHOT_WIDTH * scale}px`;
-    dropOverlay.style.height = `${360 * scale}px`;
+    dropOverlay.style.height = `${360 * scale}px`; // placeholder always full width
     dropOverlay.style.display = 'flex';
   }
 
@@ -230,13 +234,14 @@
   // a clean 1600px render — no downsampling from the DPR display canvas.
 
   function download() {
+    const imgW = loadedImage ? Math.min(loadedImage.naturalWidth, SCREENSHOT_WIDTH) : SCREENSHOT_WIDTH;
     const scaledImgH = loadedImage
-      ? Math.round((loadedImage.naturalHeight / loadedImage.naturalWidth) * SCREENSHOT_WIDTH)
+      ? Math.round((loadedImage.naturalHeight / loadedImage.naturalWidth) * imgW)
       : 360;
     const logicalH = computeCanvasHeight(scaledImgH);
 
     const exportCanvas = document.createElement('canvas');
-    exportCanvas.width  = CANVAS_WIDTH;
+    exportCanvas.width  = imgW + PADDING * 2;
     exportCanvas.height = logicalH;
 
     const exportCtx = exportCanvas.getContext('2d');
