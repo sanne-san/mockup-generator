@@ -237,9 +237,10 @@
     if (!loadedImage) return;
 
     const src   = loadedImage;
-    const drawW = Math.min(src.naturalWidth, SCREENSHOT_WIDTH);
-    const drawH = Math.round(src.naturalHeight * (drawW / src.naturalWidth));
-
+    // Draw at native resolution — zero scaling, zero quality loss.
+    // Output width = image width + padding. No SCREENSHOT_WIDTH cap applied here.
+    const drawW  = src.naturalWidth;
+    const drawH  = src.naturalHeight;
     const totalW = drawW + PADDING * 2;
     const totalH = PADDING + CHROME_HEIGHT + drawH + PADDING;
 
@@ -247,10 +248,6 @@
     el.width  = totalW;
     el.height = totalH;
     const c   = el.getContext('2d');
-
-    // Set smoothing on the raw context FIRST before any save/restore
-    c.imageSmoothingEnabled = true;
-    c.imageSmoothingQuality = 'high';
 
     const fx = PADDING;
     const fy = PADDING;
@@ -284,20 +281,12 @@
 
     // Traffic light dots
     const dotY = fy + CHROME_HEIGHT / 2;
-    circleDot(c, fx + 20,      dotY, 6, DOT_RED);
-    circleDot(c, fx + 40,      dotY, 6, DOT_YELLOW);
-    circleDot(c, fx + 60,      dotY, 6, DOT_GREEN);
+    circleDot(c, fx + 20, dotY, 6, DOT_RED);
+    circleDot(c, fx + 40, dotY, 6, DOT_YELLOW);
+    circleDot(c, fx + 60, dotY, 6, DOT_GREEN);
 
-    // Pre-scale the screenshot to exact target dimensions in a dedicated canvas,
-    // then stamp it 1:1 (no scaling at this step, so smoothing settings are irrelevant).
-    const scaled = document.createElement('canvas');
-    scaled.width  = drawW;
-    scaled.height = drawH;
-    const sc = scaled.getContext('2d');
-    sc.imageSmoothingEnabled = true;
-    sc.imageSmoothingQuality = 'high';
-    sc.drawImage(src, 0, 0, drawW, drawH);
-    c.drawImage(scaled, fx, fy + CHROME_HEIGHT);
+    // Screenshot at native resolution — no scaling whatsoever
+    c.drawImage(src, fx, fy + CHROME_HEIGHT);
 
     c.restore();
 
