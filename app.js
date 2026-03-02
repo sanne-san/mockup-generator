@@ -29,7 +29,7 @@
   const downloadLabel = document.getElementById('download-label');
   const resetBtn      = document.getElementById('reset-btn');
 
-  downloadLabel.textContent = 'Download WebP';
+  downloadLabel.textContent = 'Download';
 
   // ─── State ────────────────────────────────────────────────────────────────
   let loadedImage = null;
