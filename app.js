@@ -2,7 +2,7 @@
   // ─── Constants ────────────────────────────────────────────────────────────
   const CANVAS_WIDTH     = 2000;
   const PADDING          = 0;
-  const CHROME_HEIGHT    = 44;
+  const CHROME_HEIGHT    = 48;
   const CHROME_RADIUS    = 12;
   const SCREENSHOT_WIDTH = CANVAS_WIDTH; // 2000px, no padding
 
@@ -133,8 +133,8 @@
 
     // Traffic light dots
     const dotY  = frameY + CHROME_HEIGHT / 2;
-    const dotGap = 20;
-    const dotR  = 6;
+    const dotGap = 22;
+    const dotR  = 7;
     const dotsX = frameX + 20;
     circleDot(c, dotsX,           dotY, dotR, DOT_RED);
     circleDot(c, dotsX + dotGap,  dotY, dotR, DOT_YELLOW);
@@ -337,9 +337,9 @@
 
     // Dots
     const dotY = fy + CHROME_HEIGHT / 2;
-    circleDot(c, fx + 20, dotY, 6, DOT_RED);
-    circleDot(c, fx + 40, dotY, 6, DOT_YELLOW);
-    circleDot(c, fx + 60, dotY, 6, DOT_GREEN);
+    circleDot(c, fx + 20, dotY, 7, DOT_RED);
+    circleDot(c, fx + 42, dotY, 7, DOT_YELLOW);
+    circleDot(c, fx + 64, dotY, 7, DOT_GREEN);
 
     // Screenshot — already scaled to exact size, drawn 1:1
     c.drawImage(scaledSource, fx, fy + CHROME_HEIGHT);
@@ -410,9 +410,9 @@
     c.fillStyle = CHROME_BAR_BG;
     c.fillRect(fx, fy, fw, CHROME_HEIGHT);
     const dotY = fy + CHROME_HEIGHT / 2;
-    circleDot(c, fx + 20, dotY, 6, DOT_RED);
-    circleDot(c, fx + 40, dotY, 6, DOT_YELLOW);
-    circleDot(c, fx + 60, dotY, 6, DOT_GREEN);
+    circleDot(c, fx + 20, dotY, 7, DOT_RED);
+    circleDot(c, fx + 42, dotY, 7, DOT_YELLOW);
+    circleDot(c, fx + 64, dotY, 7, DOT_GREEN);
     c.drawImage(scaledSource, fx, fy + CHROME_HEIGHT);
     c.restore();
 
