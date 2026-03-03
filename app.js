@@ -34,9 +34,12 @@
   const cropCancelBtn = document.getElementById('crop-cancel-btn');
 
   // ─── State ────────────────────────────────────────────────────────────────
-  let loadedImage   = null;  // currently displayed image (may be cropped)
-  let originalImage = null;  // the raw uploaded image (never modified)
+  let loadedImage     = null;  // currently displayed image (may be cropped)
+  let originalImage   = null;  // the raw uploaded image (never modified)
   let cropperInstance = null;
+  let cropAspectRatio = NaN;   // NaN = free, otherwise a numeric ratio
+
+  const RATIO_MAP = { 'free': NaN, '16:9': 16 / 9, '4:3': 4 / 3, '1:1': 1 };
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -268,6 +271,7 @@
         rotatable: false,
         scalable: false,
         background: false,
+        aspectRatio: cropAspectRatio,
       });
     };
     // If already loaded (cached src), fire manually
@@ -498,6 +502,15 @@
   cropApplyBtn.addEventListener('click', applyCrop);
   cropCancelBtn.addEventListener('click', closeCropModal);
   cropModal.addEventListener('click', (e) => { if (e.target === cropModal) closeCropModal(); });
+
+  document.querySelectorAll('.crop-ratio-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      cropAspectRatio = RATIO_MAP[btn.dataset.ratio];
+      if (cropperInstance) cropperInstance.setAspectRatio(cropAspectRatio);
+      document.querySelectorAll('.crop-ratio-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
 
   window.addEventListener('paste', handlePaste);
   document.addEventListener('paste', handlePaste);

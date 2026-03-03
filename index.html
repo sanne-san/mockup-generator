@@ -23,6 +23,13 @@
       cursor: pointer;
     }
 
+    .crop-ratio-btn { color: #6b7280; }
+    .crop-ratio-btn.active {
+      background: #fff;
+      color: #111827;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+
     #drop-overlay.drag-over {
       background-color: rgba(59, 130, 246, 0.06);
     }
@@ -92,7 +99,15 @@
   <div id="crop-modal" style="display:none" class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-6">
     <div class="bg-white rounded-xl flex flex-col w-full max-w-5xl" style="max-height:90vh">
       <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
-        <h2 class="text-base font-semibold text-gray-900">Crop image</h2>
+        <div class="flex items-center gap-4">
+          <h2 class="text-base font-semibold text-gray-900">Crop image</h2>
+          <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+            <button data-ratio="free" class="crop-ratio-btn active px-3 py-1 rounded-md text-xs font-medium transition-colors">Free</button>
+            <button data-ratio="16:9" class="crop-ratio-btn px-3 py-1 rounded-md text-xs font-medium transition-colors">16:9</button>
+            <button data-ratio="4:3"  class="crop-ratio-btn px-3 py-1 rounded-md text-xs font-medium transition-colors">4:3</button>
+            <button data-ratio="1:1"  class="crop-ratio-btn px-3 py-1 rounded-md text-xs font-medium transition-colors">1:1</button>
+          </div>
+        </div>
         <div class="flex items-center gap-2">
           <button id="crop-cancel-btn" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">
             Cancel
@@ -109,6 +124,6 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-  <script src="app.js?v=9"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>
