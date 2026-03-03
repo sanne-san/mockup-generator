@@ -74,7 +74,7 @@
   <main class="max-w-5xl mx-auto px-6 py-10">
 
     <!-- Preview area -->
-    <div id="preview-wrapper" class="relative rounded-xl overflow-hidden">
+    <div id="preview-wrapper" class="relative">
       <!-- Canvas (scaled down for preview) -->
       <div id="canvas-container" class="relative w-full flex items-start justify-center">
         <canvas id="mockup-canvas" class="block w-full h-auto"></canvas>
@@ -82,7 +82,7 @@
         <!-- Drop overlay — sits on top of the canvas, sized to match the screenshot area -->
         <div
           id="drop-overlay"
-          class="absolute bg-white flex flex-col items-center justify-center gap-3 select-none transition-colors"
+          class="absolute flex flex-col items-center justify-center gap-3 select-none transition-colors"
         >
           <input id="file-input" type="file" accept="image/*" class="hidden" />
           <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,6 +120,6 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
   const CANVAS_WIDTH     = 2000;
   const PADDING          = 0;
   const CHROME_HEIGHT    = 52;
-  const CHROME_RADIUS    = 12;
+  const CHROME_RADIUS    = 20;
   const SCREENSHOT_WIDTH = CANVAS_WIDTH; // 2000px, no padding
 
   // Cap DPR at 2 to avoid huge canvases on 3× displays
@@ -135,7 +135,7 @@
     const dotY  = frameY + CHROME_HEIGHT / 2;
     const dotGap = 24;
     const dotR  = 8;
-    const dotsX = frameX + 22;
+    const dotsX = frameX + 28;
     circleDot(c, dotsX,           dotY, dotR, DOT_RED);
     circleDot(c, dotsX + dotGap,  dotY, dotR, DOT_YELLOW);
     circleDot(c, dotsX + dotGap * 2, dotY, dotR, DOT_GREEN);
@@ -155,15 +155,24 @@
 
     c.restore(); // end clip
 
-    // ── Border (inset 0.5px so stroke falls fully inside the canvas edge) ──
+    // ── Border (inset 1.5px so 3px stroke falls fully inside canvas edge) ──
     c.save();
-    roundRect(c, frameX + 1, frameY + 1, frameW - 2, frameH - 2, CHROME_RADIUS);
+    roundRect(c, frameX + 1.5, frameY + 1.5, frameW - 3, frameH - 3, CHROME_RADIUS);
     c.strokeStyle = FRAME_BORDER;
-    c.lineWidth   = 2;
+    c.lineWidth   = 3;
     c.stroke();
     c.restore();
 
     return logicalH;
+  }
+
+  // ─── Canvas CSS border-radius sync ───────────────────────────────────────
+  // Keeps the canvas element's CSS border-radius in step with CHROME_RADIUS so
+  // the canvas drawing and its CSS box clip at exactly the same curve.
+
+  function updateCanvasRadius() {
+    const w = canvas.offsetWidth;
+    if (w > 0) canvas.style.borderRadius = `${CHROME_RADIUS * w / CANVAS_WIDTH}px`;
   }
 
   // ─── Preview canvas rendering ─────────────────────────────────────────────
@@ -181,6 +190,7 @@
     ctx.scale(DPR, DPR);
 
     drawMockupOnContext(ctx, img);
+    requestAnimationFrame(updateCanvasRadius);
   }
 
   // ─── Overlay positioning ──────────────────────────────────────────────────
@@ -200,6 +210,7 @@
     dropOverlay.style.height       = `${PLACEHOLDER_HEIGHT * scale}px`;
     dropOverlay.style.borderRadius = `0 0 ${br} ${br}`;
     dropOverlay.style.display = 'flex';
+    updateCanvasRadius();
   }
 
   // ─── Image loading ────────────────────────────────────────────────────────
@@ -339,20 +350,20 @@
 
     // Dots
     const dotY = fy + CHROME_HEIGHT / 2;
-    circleDot(c, fx + 22, dotY, 8, DOT_RED);
-    circleDot(c, fx + 46, dotY, 8, DOT_YELLOW);
-    circleDot(c, fx + 70, dotY, 8, DOT_GREEN);
+    circleDot(c, fx + 28, dotY, 8, DOT_RED);
+    circleDot(c, fx + 52, dotY, 8, DOT_YELLOW);
+    circleDot(c, fx + 76, dotY, 8, DOT_GREEN);
 
     // Screenshot — already scaled to exact size, drawn 1:1
     c.drawImage(scaledSource, fx, fy + CHROME_HEIGHT);
 
     c.restore();
 
-    // Border (inset 1px so 2px stroke falls fully inside canvas edge)
+    // Border (inset 1.5px so 3px stroke falls fully inside canvas edge)
     c.save();
-    roundRect(c, fx + 1, fy + 1, fw - 2, fh - 2, CHROME_RADIUS);
+    roundRect(c, fx + 1.5, fy + 1.5, fw - 3, fh - 3, CHROME_RADIUS);
     c.strokeStyle = FRAME_BORDER;
-    c.lineWidth   = 2;
+    c.lineWidth   = 3;
     c.stroke();
     c.restore();
 
@@ -412,17 +423,17 @@
     c.fillStyle = CHROME_BAR_BG;
     c.fillRect(fx, fy, fw, CHROME_HEIGHT);
     const dotY = fy + CHROME_HEIGHT / 2;
-    circleDot(c, fx + 22, dotY, 8, DOT_RED);
-    circleDot(c, fx + 46, dotY, 8, DOT_YELLOW);
-    circleDot(c, fx + 70, dotY, 8, DOT_GREEN);
+    circleDot(c, fx + 28, dotY, 8, DOT_RED);
+    circleDot(c, fx + 52, dotY, 8, DOT_YELLOW);
+    circleDot(c, fx + 76, dotY, 8, DOT_GREEN);
     c.drawImage(scaledSource, fx, fy + CHROME_HEIGHT);
     c.restore();
 
-    // Border (inset 1px so 2px stroke falls fully inside canvas edge)
+    // Border (inset 1.5px so 3px stroke falls fully inside canvas edge)
     c.save();
-    roundRect(c, fx + 1, fy + 1, fw - 2, fh - 2, CHROME_RADIUS);
+    roundRect(c, fx + 1.5, fy + 1.5, fw - 3, fh - 3, CHROME_RADIUS);
     c.strokeStyle = FRAME_BORDER;
-    c.lineWidth   = 2;
+    c.lineWidth   = 3;
     c.stroke();
     c.restore();
 
@@ -487,6 +498,7 @@
 
   window.addEventListener('resize', () => {
     if (!loadedImage) positionOverlay();
+    updateCanvasRadius();
   });
 
   // ─── Init ─────────────────────────────────────────────────────────────────
