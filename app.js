@@ -1,10 +1,10 @@
 (() => {
   // ─── Constants ────────────────────────────────────────────────────────────
   const CANVAS_WIDTH     = 2000;
-  const PADDING          = 40;
+  const PADDING          = 0;
   const CHROME_HEIGHT    = 44;
   const CHROME_RADIUS    = 12;
-  const SCREENSHOT_WIDTH = CANVAS_WIDTH - PADDING * 2; // 1920px
+  const SCREENSHOT_WIDTH = CANVAS_WIDTH; // 2000px, no padding
 
   // Cap DPR at 2 to avoid huge canvases on 3× displays
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -16,7 +16,7 @@
   const DOT_YELLOW     = '#FFBD2E';
   const DOT_GREEN      = '#28C840';
   const FRAME_BORDER        = '#ECECEE';
-  const PLACEHOLDER_HEIGHT  = 520; // empty-state screenshot area height
+  const PLACEHOLDER_HEIGHT  = 1250; // 16:10 MacBook ratio (2000 × 0.625)
 
 
   // ─── DOM refs ─────────────────────────────────────────────────────────────
@@ -117,28 +117,6 @@
     // Clear to transparent
     c.clearRect(0, 0, CANVAS_WIDTH, logicalH);
 
-    // ── Shadows (two-layer to match CSS: rgba(0,0,0,0.1) 0 20px 25px -5px, rgba(0,0,0,0.04) 0 10px 10px -5px) ──
-    // Spread -5px is simulated by shrinking the shadow source rect by 5px each side.
-    c.save();
-    c.shadowColor   = 'rgba(0, 0, 0, 0.1)';
-    c.shadowBlur    = 25;
-    c.shadowOffsetX = 0;
-    c.shadowOffsetY = 20;
-    roundRect(c, frameX + 5, frameY + 5, frameW - 10, frameH - 10, CHROME_RADIUS);
-    c.fillStyle = CHROME_BG;
-    c.fill();
-    c.restore();
-
-    c.save();
-    c.shadowColor   = 'rgba(0, 0, 0, 0.04)';
-    c.shadowBlur    = 10;
-    c.shadowOffsetX = 0;
-    c.shadowOffsetY = 10;
-    roundRect(c, frameX + 5, frameY + 5, frameW - 10, frameH - 10, CHROME_RADIUS);
-    c.fillStyle = CHROME_BG;
-    c.fill();
-    c.restore();
-
     // ── White frame ──
     roundRect(c, frameX, frameY, frameW, frameH, CHROME_RADIUS);
     c.fillStyle = CHROME_BG;
@@ -177,9 +155,9 @@
 
     c.restore(); // end clip
 
-    // ── Border ──
+    // ── Border (inset 0.5px so stroke falls fully inside the canvas edge) ──
     c.save();
-    roundRect(c, frameX, frameY, frameW, frameH, CHROME_RADIUS);
+    roundRect(c, frameX + 0.5, frameY + 0.5, frameW - 1, frameH - 1, CHROME_RADIUS);
     c.strokeStyle = FRAME_BORDER;
     c.lineWidth   = 1;
     c.stroke();
@@ -343,27 +321,6 @@
     el.height = totalH;
     const c = el.getContext('2d');
 
-    // Shadows
-    c.save();
-    c.shadowColor   = 'rgba(0, 0, 0, 0.1)';
-    c.shadowBlur    = 25;
-    c.shadowOffsetX = 0;
-    c.shadowOffsetY = 20;
-    roundRect(c, fx + 5, fy + 5, fw - 10, fh - 10, CHROME_RADIUS);
-    c.fillStyle = CHROME_BG;
-    c.fill();
-    c.restore();
-
-    c.save();
-    c.shadowColor   = 'rgba(0, 0, 0, 0.04)';
-    c.shadowBlur    = 10;
-    c.shadowOffsetX = 0;
-    c.shadowOffsetY = 10;
-    roundRect(c, fx + 5, fy + 5, fw - 10, fh - 10, CHROME_RADIUS);
-    c.fillStyle = CHROME_BG;
-    c.fill();
-    c.restore();
-
     // Frame
     roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
     c.fillStyle = CHROME_BG;
@@ -389,9 +346,9 @@
 
     c.restore();
 
-    // Border
+    // Border (inset 0.5px so stroke falls fully inside canvas edge)
     c.save();
-    roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
+    roundRect(c, fx + 0.5, fy + 0.5, fw - 1, fh - 1, CHROME_RADIUS);
     c.strokeStyle = FRAME_BORDER;
     c.lineWidth   = 1;
     c.stroke();
@@ -444,24 +401,6 @@
     el.width = totalW; el.height = totalH;
     const c = el.getContext('2d');
 
-    c.save();
-    c.shadowColor   = 'rgba(0, 0, 0, 0.1)';
-    c.shadowBlur    = 25;
-    c.shadowOffsetX = 0;
-    c.shadowOffsetY = 20;
-    roundRect(c, fx + 5, fy + 5, fw - 10, fh - 10, CHROME_RADIUS);
-    c.fillStyle = CHROME_BG; c.fill();
-    c.restore();
-
-    c.save();
-    c.shadowColor   = 'rgba(0, 0, 0, 0.04)';
-    c.shadowBlur    = 10;
-    c.shadowOffsetX = 0;
-    c.shadowOffsetY = 10;
-    roundRect(c, fx + 5, fy + 5, fw - 10, fh - 10, CHROME_RADIUS);
-    c.fillStyle = CHROME_BG; c.fill();
-    c.restore();
-
     roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
     c.fillStyle = CHROME_BG; c.fill();
 
@@ -477,8 +416,9 @@
     c.drawImage(scaledSource, fx, fy + CHROME_HEIGHT);
     c.restore();
 
+    // Border (inset 0.5px so stroke falls fully inside canvas edge)
     c.save();
-    roundRect(c, fx, fy, fw, fh, CHROME_RADIUS);
+    roundRect(c, fx + 0.5, fy + 0.5, fw - 1, fh - 1, CHROME_RADIUS);
     c.strokeStyle = FRAME_BORDER;
     c.lineWidth   = 1;
     c.stroke();
