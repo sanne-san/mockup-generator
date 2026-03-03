@@ -505,8 +505,40 @@
 
   document.querySelectorAll('.crop-ratio-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      cropAspectRatio = RATIO_MAP[btn.dataset.ratio];
-      if (cropperInstance) cropperInstance.setAspectRatio(cropAspectRatio);
+      const newRatio = RATIO_MAP[btn.dataset.ratio];
+      cropAspectRatio = newRatio;
+
+      if (cropperInstance) {
+        // Snapshot current crop box before Cropper resets it
+        const box      = cropperInstance.getCropBoxData();
+        const centerX  = box.left + box.width / 2;
+        const centerY  = box.top  + box.height / 2;
+
+        cropperInstance.setAspectRatio(newRatio);
+
+        // Restore after Cropper has re-rendered
+        requestAnimationFrame(() => {
+          if (isNaN(newRatio)) {
+            // Free — restore exact box
+            cropperInstance.setCropBoxData(box);
+          } else {
+            // Fixed ratio — keep the same center and width; adjust height
+            const container = cropperInstance.getContainerData();
+            let w = box.width;
+            let h = w / newRatio;
+            // If that height is too tall, pivot and constrain by height instead
+            if (h > container.height) { h = container.height; w = h * newRatio; }
+            if (w > container.width)  { w = container.width;  h = w / newRatio; }
+            cropperInstance.setCropBoxData({
+              left:   centerX - w / 2,
+              top:    centerY - h / 2,
+              width:  w,
+              height: h,
+            });
+          }
+        });
+      }
+
       document.querySelectorAll('.crop-ratio-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     });
