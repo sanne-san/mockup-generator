@@ -2,7 +2,7 @@
   // ─── Constants ────────────────────────────────────────────────────────────
   const CANVAS_WIDTH     = 2000;
   const PADDING          = 0;
-  const CHROME_HEIGHT    = 48;
+  const CHROME_HEIGHT    = 52;
   const CHROME_RADIUS    = 12;
   const SCREENSHOT_WIDTH = CANVAS_WIDTH; // 2000px, no padding
 
@@ -133,9 +133,9 @@
 
     // Traffic light dots
     const dotY  = frameY + CHROME_HEIGHT / 2;
-    const dotGap = 22;
-    const dotR  = 7;
-    const dotsX = frameX + 20;
+    const dotGap = 24;
+    const dotR  = 8;
+    const dotsX = frameX + 22;
     circleDot(c, dotsX,           dotY, dotR, DOT_RED);
     circleDot(c, dotsX + dotGap,  dotY, dotR, DOT_YELLOW);
     circleDot(c, dotsX + dotGap * 2, dotY, dotR, DOT_GREEN);
@@ -157,9 +157,9 @@
 
     // ── Border (inset 0.5px so stroke falls fully inside the canvas edge) ──
     c.save();
-    roundRect(c, frameX + 0.5, frameY + 0.5, frameW - 1, frameH - 1, CHROME_RADIUS);
+    roundRect(c, frameX + 1, frameY + 1, frameW - 2, frameH - 2, CHROME_RADIUS);
     c.strokeStyle = FRAME_BORDER;
-    c.lineWidth   = 1;
+    c.lineWidth   = 2;
     c.stroke();
     c.restore();
 
@@ -193,10 +193,12 @@
     const displayW = canvas.offsetWidth;
     const scale    = displayW / CANVAS_WIDTH;
 
-    dropOverlay.style.left   = `${PADDING * scale}px`;
-    dropOverlay.style.top    = `${(PADDING + CHROME_HEIGHT) * scale}px`;
-    dropOverlay.style.width  = `${SCREENSHOT_WIDTH * scale}px`;
-    dropOverlay.style.height = `${PLACEHOLDER_HEIGHT * scale}px`;
+    const br = `${CHROME_RADIUS * scale}px`;
+    dropOverlay.style.left         = `${PADDING * scale}px`;
+    dropOverlay.style.top          = `${(PADDING + CHROME_HEIGHT) * scale}px`;
+    dropOverlay.style.width        = `${SCREENSHOT_WIDTH * scale}px`;
+    dropOverlay.style.height       = `${PLACEHOLDER_HEIGHT * scale}px`;
+    dropOverlay.style.borderRadius = `0 0 ${br} ${br}`;
     dropOverlay.style.display = 'flex';
   }
 
@@ -337,20 +339,20 @@
 
     // Dots
     const dotY = fy + CHROME_HEIGHT / 2;
-    circleDot(c, fx + 20, dotY, 7, DOT_RED);
-    circleDot(c, fx + 42, dotY, 7, DOT_YELLOW);
-    circleDot(c, fx + 64, dotY, 7, DOT_GREEN);
+    circleDot(c, fx + 22, dotY, 8, DOT_RED);
+    circleDot(c, fx + 46, dotY, 8, DOT_YELLOW);
+    circleDot(c, fx + 70, dotY, 8, DOT_GREEN);
 
     // Screenshot — already scaled to exact size, drawn 1:1
     c.drawImage(scaledSource, fx, fy + CHROME_HEIGHT);
 
     c.restore();
 
-    // Border (inset 0.5px so stroke falls fully inside canvas edge)
+    // Border (inset 1px so 2px stroke falls fully inside canvas edge)
     c.save();
-    roundRect(c, fx + 0.5, fy + 0.5, fw - 1, fh - 1, CHROME_RADIUS);
+    roundRect(c, fx + 1, fy + 1, fw - 2, fh - 2, CHROME_RADIUS);
     c.strokeStyle = FRAME_BORDER;
-    c.lineWidth   = 1;
+    c.lineWidth   = 2;
     c.stroke();
     c.restore();
 
@@ -410,17 +412,17 @@
     c.fillStyle = CHROME_BAR_BG;
     c.fillRect(fx, fy, fw, CHROME_HEIGHT);
     const dotY = fy + CHROME_HEIGHT / 2;
-    circleDot(c, fx + 20, dotY, 7, DOT_RED);
-    circleDot(c, fx + 42, dotY, 7, DOT_YELLOW);
-    circleDot(c, fx + 64, dotY, 7, DOT_GREEN);
+    circleDot(c, fx + 22, dotY, 8, DOT_RED);
+    circleDot(c, fx + 46, dotY, 8, DOT_YELLOW);
+    circleDot(c, fx + 70, dotY, 8, DOT_GREEN);
     c.drawImage(scaledSource, fx, fy + CHROME_HEIGHT);
     c.restore();
 
-    // Border (inset 0.5px so stroke falls fully inside canvas edge)
+    // Border (inset 1px so 2px stroke falls fully inside canvas edge)
     c.save();
-    roundRect(c, fx + 0.5, fy + 0.5, fw - 1, fh - 1, CHROME_RADIUS);
+    roundRect(c, fx + 1, fy + 1, fw - 2, fh - 2, CHROME_RADIUS);
     c.strokeStyle = FRAME_BORDER;
-    c.lineWidth   = 1;
+    c.lineWidth   = 2;
     c.stroke();
     c.restore();
 

@@ -35,8 +35,7 @@
     }
 
     #drop-overlay.drag-over {
-      background-color: rgba(59, 130, 246, 0.08);
-      border-color: #3b82f6 !important;
+      background-color: rgba(59, 130, 246, 0.06);
     }
   </style>
 </head>
@@ -83,7 +82,7 @@
         <!-- Drop overlay — sits on top of the canvas, sized to match the screenshot area -->
         <div
           id="drop-overlay"
-          class="absolute border-2 border-dashed border-gray-300 bg-white rounded flex flex-col items-center justify-center gap-3 select-none transition-colors"
+          class="absolute bg-white flex flex-col items-center justify-center gap-3 select-none transition-colors"
         >
           <input id="file-input" type="file" accept="image/*" class="hidden" />
           <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,6 +120,6 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>
